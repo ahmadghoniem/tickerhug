@@ -2,7 +2,8 @@
 const { https } = require("follow-redirects")
 const axios = require("axios")
 const crypto = require("crypto")
-const cron = require("node-cron")
+const express = require("express")
+const app = express()
 require("dotenv").config()
 
 const PORT = process.env.PORT || 3000
@@ -175,7 +176,7 @@ async function sendAccountUpdateSMS() {
     },
     maxRedirects: 20
   }
-  /*
+
   const req = https.request(options, (res) => {
     const chunks = []
     res.on("data", (chunk) => chunks.push(chunk))
@@ -185,20 +186,20 @@ async function sendAccountUpdateSMS() {
     res.on("error", console.error)
   })
   req.write(body)
-  req.end()*/
+  req.end()
 }
+// === ENDPOINT ===
 
-// === Cron Jobs ===
-// Daily at 9PM UTC+3 => which is 18:00 UTC
-cron.schedule("0 18 * * *", () => {
-  console.log("[Cron Job] Sending account update SMS at 9PM Egypt time...")
-  sendAccountUpdateSMS()
+app.get("/run-cron", async (req, res) => {
+  try {
+    console.log("cron ran at", new Date().toISOString())
+    await sendAccountUpdateSMS()
+    res.status(200).send("Cron job executed successfully.")
+  } catch (err) {
+    console.error("Cron job failed:", err)
+    res.status(500).send("Cron job failed.")
+  }
 })
-// NOTE: TIMEZONE USED IS THE TIMEZONE SET BY THE SERVER, NOT THE LOCAL TIMEZONE
-// Test Job: Daily at 2:30AM UTC+3 => which is 23:30 UTC
-cron.schedule("21 2 * * *", () => {
-  console.log("[Test Cron Job] Hey! It's 2:30AM Egypt time 💤")
-})
-cron.schedule("22 2 * * *", () => {
-  console.log("[Test Cron Job] Hey! It's 2:30AM Egypt time 💤")
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
 })
