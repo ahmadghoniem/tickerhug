@@ -13,6 +13,7 @@ I'm currently in military service, and while smartphones aren't allowed, I still
 ...all via a basic SMS message.
 
 ✨ Features
+
 ✅ Gets your OKX account balance
 
 ✅ Fetches BTC, ETH, SOL, LINK prices (via OKX API)
