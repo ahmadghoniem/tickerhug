@@ -7,11 +7,6 @@ const app = express()
 require("dotenv").config()
 
 const PORT = process.env.PORT || 3000
-https
-  .createServer(() => {})
-  .listen(PORT, () => {
-    console.log(`Fake server running on port ${PORT}`)
-  })
 
 // === Configuration ===
 const OKX_API_KEY = process.env.OKX_API_KEY
