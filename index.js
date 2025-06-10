@@ -5,6 +5,13 @@ const crypto = require("crypto")
 const cron = require("node-cron")
 require("dotenv").config()
 
+const PORT = process.env.PORT || 3000
+http
+  .createServer(() => {})
+  .listen(PORT, () => {
+    console.log(`Fake server running on port ${PORT}`)
+  })
+
 // === Configuration ===
 const OKX_API_KEY = process.env.OKX_API_KEY
 const OKX_SECRET_KEY = process.env.OKX_SECRET_KEY
@@ -195,7 +202,3 @@ cron.schedule("21 2 * * *", () => {
 cron.schedule("22 2 * * *", () => {
   console.log("[Test Cron Job] Hey! It's 2:30AM Egypt time 💤")
 })
-// === Manual Run (for Render) ===
-if (process.env.MANUAL === "true") {
-  sendAccountUpdateSMS()
-}
