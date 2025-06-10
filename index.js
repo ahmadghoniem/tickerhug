@@ -2,6 +2,7 @@
 const { https } = require("follow-redirects")
 const axios = require("axios")
 const crypto = require("crypto")
+const cron = require("node-cron")
 require("dotenv").config()
 
 // === Configuration ===
@@ -167,7 +168,7 @@ async function sendAccountUpdateSMS() {
     },
     maxRedirects: 20
   }
-
+  /*
   const req = https.request(options, (res) => {
     const chunks = []
     res.on("data", (chunk) => chunks.push(chunk))
@@ -177,8 +178,24 @@ async function sendAccountUpdateSMS() {
     res.on("error", console.error)
   })
   req.write(body)
-  req.end()
+  req.end()*/
 }
 
-// === Execute ===
-sendAccountUpdateSMS()
+// === Cron Jobs ===
+// Daily at 9PM UTC+3 => which is 18:00 UTC
+cron.schedule("0 18 * * *", () => {
+  console.log("[Cron Job] Sending account update SMS at 9PM Egypt time...")
+  sendAccountUpdateSMS()
+})
+// NOTE: TIMEZONE USED IS THE TIMEZONE SET BY THE SERVER, NOT THE LOCAL TIMEZONE
+// Test Job: Daily at 2:30AM UTC+3 => which is 23:30 UTC
+cron.schedule("21 2 * * *", () => {
+  console.log("[Test Cron Job] Hey! It's 2:30AM Egypt time 💤")
+})
+cron.schedule("22 2 * * *", () => {
+  console.log("[Test Cron Job] Hey! It's 2:30AM Egypt time 💤")
+})
+// === Manual Run (for Render) ===
+if (process.env.MANUAL === "true") {
+  sendAccountUpdateSMS()
+}
