@@ -6,7 +6,7 @@ const cron = require("node-cron")
 require("dotenv").config()
 
 const PORT = process.env.PORT || 3000
-http
+https
   .createServer(() => {})
   .listen(PORT, () => {
     console.log(`Fake server running on port ${PORT}`)
