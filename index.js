@@ -184,7 +184,9 @@ async function sendAccountUpdateSMS() {
   req.end()
 }
 // === ENDPOINT ===
-
+app.get("/", (req, res) => {
+  res.send("Welcome to TickerHug! 🚀")
+})
 app.get("/run-cron", async (req, res) => {
   try {
     console.log("cron ran at", new Date().toISOString())
