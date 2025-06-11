@@ -144,7 +144,7 @@ async function sendAccountUpdateSMS() {
       fetchRunningGridBots(),
       fetchAffirmationText()
     ])
-  // won't be possible to fit messageWithgrid in 160 characters
+
   const messageWithGrid = `${balanceText}\n${pricesText}\n${gridText}`
   const messageWithoutGrid = `${balanceText}\n${pricesText}`
 
@@ -155,7 +155,7 @@ async function sendAccountUpdateSMS() {
       {
         destinations: [{ to: RECIPIENT_PHONE }],
         from: "OKX Updates",
-        text: message
+        text: message.slice(0, 159) // SMS messages are limited to 160 characters
       }
     ]
   })
@@ -185,6 +185,7 @@ async function sendAccountUpdateSMS() {
 }
 // === ENDPOINT ===
 app.get("/", (req, res) => {
+  console.log("Welcome to TickerHug! 🚀")
   res.send("Welcome to TickerHug! 🚀")
 })
 app.get("/run-cron", async (req, res) => {
