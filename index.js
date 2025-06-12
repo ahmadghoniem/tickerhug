@@ -12,9 +12,12 @@ const PORT = process.env.PORT || 3000
 const OKX_API_KEY = process.env.OKX_API_KEY
 const OKX_SECRET_KEY = process.env.OKX_SECRET_KEY
 const OKX_PASSPHRASE = process.env.OKX_PASSPHRASE
-const INFOBIP_API_KEY = process.env.INFOBIP_API_KEY
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN
+const RECIPIENT_PHONE_NUMBER = process.env.RECIPIENT_PHONE_NUMBER
+const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER
 const OKX_BASE_URL = "https://www.okx.com"
-const RECIPIENT_PHONE = "+201277891627"
+const twilioClient = require("twilio")(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
 // === Utility Functions ===
 const formatSymbol = (symbol) => symbol.split("-").slice(0, 2).join("")
@@ -145,43 +148,20 @@ async function sendAccountUpdateSMS() {
       fetchAffirmationText()
     ])
 
-  const messageWithGrid = `${balanceText}\n${pricesText}\n${gridText}`
-  const messageWithoutGrid = `${balanceText}\n${pricesText}`
+  const messageWithGridDetails = `${balanceText}\n${pricesText}\n${gridText}`
+  const messageWithoutGridDetails = `${balanceText}\n${pricesText}`
+  const message = `${messageWithoutGridDetails}\n${affirmationText}`
 
-  const message = `${messageWithoutGrid}\n${affirmationText}`
-  console.log(message)
-  const body = JSON.stringify({
-    messages: [
-      {
-        destinations: [{ to: RECIPIENT_PHONE }],
-        from: "OKX Updates",
-        text: message.slice(0, 159) // SMS messages are limited to 160 characters
-      }
-    ]
-  })
-
-  const options = {
-    method: "POST",
-    hostname: "qd2vxq.api.infobip.com",
-    path: "/sms/2/text/advanced",
-    headers: {
-      Authorization: `App ${INFOBIP_API_KEY}`,
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    },
-    maxRedirects: 20
+  try {
+    await twilioClient.messages.create({
+      body: message.slice(0, 121), // Limit to 121 characters as twilio adds mandotory prefix of 38 characters totalling 159 characters
+      from: TWILIO_PHONE_NUMBER,
+      to: RECIPIENT_PHONE_NUMBER
+    })
+    console.log("SMS sent successfully!")
+  } catch (err) {
+    console.error("SMS sending failed:", err)
   }
-
-  const req = https.request(options, (res) => {
-    const chunks = []
-    res.on("data", (chunk) => chunks.push(chunk))
-    res.on("end", () =>
-      console.log("SMS Sent:", Buffer.concat(chunks).toString())
-    )
-    res.on("error", console.error)
-  })
-  req.write(body)
-  req.end()
 }
 // === ENDPOINT ===
 app.get("/", (req, res) => {
@@ -190,8 +170,8 @@ app.get("/", (req, res) => {
 })
 app.get("/run-cron", async (req, res) => {
   try {
-    console.log("cron ran at", new Date().toISOString())
     await sendAccountUpdateSMS()
+    console.log("cron ran at", new Date().toISOString())
     res.status(200).send("Cron job executed successfully.")
   } catch (err) {
     console.error("Cron job failed:", err)
