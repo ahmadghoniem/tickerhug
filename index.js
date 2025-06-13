@@ -41,10 +41,11 @@ function formatGridBotData(data) {
     const liq = bot.liqPx ? +parseFloat(bot.liqPx).toFixed(2) : "N/A"
     const min = bot.minPx ? +parseFloat(bot.minPx).toFixed(2) : "N/A"
     const max = bot.maxPx ? +parseFloat(bot.maxPx).toFixed(2) : "N/A"
+    const arb = bot.arbitrageNum ?? "N/A" // fallback if arbitrageNum is missing
 
     return `${
       i + 1
-    }) ${t} | ${d} | PnL: $${gp} (${pp}%) | Inv: $${inv} | Liq: $${liq} | Range: $${min}->$${max}`
+    }) ${t} | ${d} | PnL: $${gp} (${pp}%) | Inv: $${inv} | Liq: $${liq} | Range: $${min}->$${max} | Arbs: ${arb}`
   })
 
   return `Active bots: ${data.length}\n${lines.join("\n")}`
@@ -56,8 +57,8 @@ function formatGridBotData(data) {
 async function fetchTickerPrices() {
   const instruments = [
     "BTC-USDT-SWAP",
-    "SOL-USDT-SWAP",
-    "ETH-USDT-SWAP",
+    // "SOL-USDT-SWAP", // Uncomment if you want to include SOL removed for charcter limit
+    // "ETH-USDT-SWAP",  // Uncomment if you want to include ETH removed for charcter limit
     "LINK-USDT-SWAP"
   ]
   const headers = { "Content-Type": "application/json" }
@@ -150,11 +151,12 @@ async function sendAccountUpdateSMS() {
 
   const messageWithGridDetails = `${balanceText}\n${pricesText}\n${gridText}`
   const messageWithoutGridDetails = `${balanceText}\n${pricesText}`
-  const message = `${messageWithoutGridDetails}\n${affirmationText}`
+  const message = `${messageWithoutGridDetails}\n${affirmationText}` // use when there are no grid bots running
+  const messageWithGrid = `${messageWithGridDetails}\n` // use when there are grid bots running can't have affirmation text in this case due to character limit
 
   try {
     await twilioClient.messages.create({
-      body: message.slice(0, 121), // Limit to 121 characters as twilio adds mandotory prefix of 38 characters totalling 159 characters
+      body: messageWithGrid.slice(0, 121), // Limit to 121 characters as twilio adds mandotory prefix of 38 characters totalling 159 characters
       from: TWILIO_PHONE_NUMBER,
       to: RECIPIENT_PHONE_NUMBER
     })
