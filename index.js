@@ -154,11 +154,11 @@ async function sendAccountUpdateSMS() {
   const messageWithGrid = `${messageWithGridDetails}\n` // use when there are grid bots running can't have affirmation text in this case due to character limit
 
   try {
-    // await twilioClient.messages.create({
-    //   body: messageWithGrid.slice(0, 121), // Limit to 121 characters as twilio adds mandotory prefix of 38 characters totalling 159 characters
-    //   from: TWILIO_PHONE_NUMBER,
-    //   to: RECIPIENT_PHONE_NUMBER
-    // })
+    await twilioClient.messages.create({
+      body: messageWithGrid.slice(0, 121), // Limit to 121 characters as twilio adds mandotory prefix of 38 characters totalling 159 characters
+      from: TWILIO_PHONE_NUMBER,
+      to: RECIPIENT_PHONE_NUMBER
+    })
     console.log(messageWithGrid.slice(0, 121))
     console.log("SMS sent successfully!")
   } catch (err) {
